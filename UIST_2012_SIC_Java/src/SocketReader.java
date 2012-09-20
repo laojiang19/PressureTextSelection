@@ -1,13 +1,14 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 
+
 import processing.core.PApplet;
 
 
 public class SocketReader extends Thread{
 	BufferedReader input;
 	MainSketch sketch;
-
+	
 	public SocketReader(BufferedReader input, MainSketch sketch){
 		this.input = input;
 		this.sketch = sketch;
