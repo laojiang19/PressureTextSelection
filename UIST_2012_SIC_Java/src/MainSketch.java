@@ -43,7 +43,7 @@ public class MainSketch extends PApplet {
 		instruments = new int[]{(int) random(128), (int) random(128), (int) random(128), (int) random(128)};
 
 		
-		float[] empty = {0, 0, 0};
+		float[] empty = {0, 0, 0, 0};
 		for(int i = 0; i < 5; i++){
 			circles.add(empty);
 		}
@@ -80,17 +80,25 @@ public class MainSketch extends PApplet {
 		
 		if(!circles.isEmpty()){
 			int i = 0;
+			int[] colour = {0, 0, 0};
 			for(float[] touch: circles){
-				if(touch[2] > 10){
-					this.color(0);
-					this.fill(0);
+				if(touch[2] > -1){
+					if(touch[3] == 0){
+						colour = new int[]{0, 0, 255};
+					} else if(touch[3] == 1){
+						colour = new int[]{0, 255, 0};
+					} else if(touch[3] == 2){
+						colour = new int[]{255, 0, 0};
+					}
+					this.fill(colour[0], colour[1], colour[2]);
 					float x = touch[0]*this.getWidth();
-					float y = touch[1]*this.getHeight();
+					float y = (1-touch[1])*this.getHeight();
+
+					text(touch[2], x, y);
+					//this.ellipse(x, y, touch[2], touch[2]);
 					
-					this.ellipse(x, y, touch[2], touch[2]);
-					
-					sound.instrument(instruments[i]);
-					sound.playNote(x, y, touch[2]);
+					//sound.instrument(instruments[i]);
+					//sound.playNote(x, y, touch[2]);
 					//sound.playNote(pitchSet[(int)random(setSize)], touch[2], 1);
 					i++;
 				}
