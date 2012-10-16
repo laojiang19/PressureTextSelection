@@ -1,19 +1,17 @@
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Vector;
 
 
 
 public class SocketReader extends Thread{
 	BufferedReader input;
 	TextSelectionSketch sketch;
-	long time = 0;
-	long prevTime = 0;
-	int buttonLeft = 0;
-	int buttonTop = 0;
-	int buttonRight = 0;
-	int buttonBottom = 0;
-	long diff = 0;
+
+	long[] time = {0, 0, 0, 0, 0};
+	long[] prevTime = {0, 0, 0, 0, 0};
+	long[] diff = {0, 0, 0, 0, 0};
+	int[] maxPressure = {-1, -1, -1, -1, -1};
+
 	final int LIGHT = 200;
 	final int MEDIUM = 400;
 
@@ -24,30 +22,30 @@ public class SocketReader extends Thread{
 
 
 	public void run(){
+		
 		while(true){
 			String forcePad;
 
 			try {
 				forcePad = input.readLine();
 				if(forcePad != null){
-					
+
 					String[] data = forcePad.split("\\|");
 					int touchNum = Integer.parseInt(data[0]);
-					if (touchNum == 0){
-						prevTime = time;
-						time = System.currentTimeMillis();
-						diff=time-prevTime;
-						
-						if(diff > 50){
-							System.out.println();
-							System.out.println("Server: " + forcePad + "| Time Difference: " + diff);
-							System.out.println();
-						} else {
-							System.out.println("Server: " + forcePad + "| Time Difference: " + diff);
-						}
+
+					prevTime[touchNum] = time[touchNum];
+					time[touchNum] = System.currentTimeMillis();
+					diff[touchNum] = time[touchNum] - prevTime[touchNum];
+
+					if(diff[touchNum] > 50){
+						maxPressure[touchNum] = -1;
+						System.out.println();
+						System.out.println("Server: " + forcePad + "| Time Difference: " + diff[touchNum]);
+						System.out.println();
 					} else {
-						System.out.println("Server: " + forcePad);
+						System.out.println("Server: " + forcePad + "| Time Difference: " + diff[touchNum]);
 					}
+
 					float x = Float.parseFloat(data[1]);
 					float y = Float.parseFloat(data[2]);
 
@@ -61,64 +59,58 @@ public class SocketReader extends Thread{
 					}
 
 					float[] touch = {x, y, pressure, -1};
-					
-					if(touchNum == 0){
-						if(pressure <= 50){
-							sketch.pressureState = -1;
-						} else if(pressure < 150){
-							sketch.pressureState = 0;
-						} else if (pressure < 350){
-							sketch.pressureState = 1;
-						} else {
-							sketch.pressureState = 2;
-						}
-						sketch.pressure = pressure;
+
+					maxPressure[touchNum] = Math.max(maxPressure[touchNum], pressure);
+
+					if(maxPressure[touchNum] <= 75){
+						sketch.pressureState[touchNum] = -1;
 						
+					} else if(maxPressure[touchNum] < 150){
+						sketch.pressureState[touchNum] = 0;
 						
-						int newX = (int) (touch[0]*sketch.getWidth());
-						int newY = (int) ((1-touch[1])*sketch.getHeight());
-						int relChangeX = 0;
-						int relChangeY = 0;
+					} else if (maxPressure[touchNum] < 350){
+						sketch.pressureState[touchNum] = 1;
 						
+					} else {
+						sketch.pressureState[touchNum] = 2;
 						
-						if(diff < 50){
-							
-							
-							relChangeX = (newX - sketch.prevX);
-							relChangeY = (newY - sketch.prevY);
-						} else {
-							
-							relChangeX = 0;
-							relChangeY = 0;
-						}
-						
-						sketch.x = sketch.x + relChangeX;
-						sketch.y = sketch.y + relChangeY;
-						
-						if(sketch.x < 0){
-							sketch.x = 0;
-						} else if (sketch.x > sketch.displayWidth){
-							sketch.x = sketch.displayWidth;
-						}
-						
-						if(sketch.y < 0){
-							sketch.y = 0;
-						} else if (sketch.y > sketch.displayHeight){
-							sketch.y = sketch.displayHeight;
-						}
-						
-						sketch.prevX = newX;
-						sketch.prevY = newY;
 					}
-					
-					
-					
+					sketch.pressure[touchNum] = pressure;
 
 
-					//sketch.color(0);
-					//sketch.fill(0);
-					//sketch.ellipse(Float.parseFloat(data[1])*sketch.getWidth(), Float.parseFloat(data[2])*sketch.getHeight(), pressure, pressure);
+					int newX = (int) (touch[0]*sketch.getWidth());
+					int newY = (int) ((1-touch[1])*sketch.getHeight());
+					int relChangeX = 0;
+					int relChangeY = 0;
 
+
+					if(diff[touchNum] < 50){
+
+						relChangeX = (newX - sketch.prevX[touchNum]);
+						relChangeY = (newY - sketch.prevY[touchNum]);
+					} else {
+
+						relChangeX = 0;
+						relChangeY = 0;
+					}
+
+					sketch.x[touchNum] = sketch.x[touchNum] + relChangeX;
+					sketch.y[touchNum] = sketch.y[touchNum] + relChangeY;
+
+					if(sketch.x[touchNum] < 0){
+						sketch.x[touchNum] = 0;
+					} else if (sketch.x[touchNum] > sketch.displayWidth){
+						sketch.x[touchNum] = sketch.displayWidth;
+					}
+
+					if(sketch.y[touchNum] < 0){
+						sketch.y[touchNum] = 0;
+					} else if (sketch.y[touchNum] > sketch.displayHeight){
+						sketch.y[touchNum] = sketch.displayHeight;
+					}
+
+					sketch.prevX[touchNum] = newX;
+					sketch.prevY[touchNum] = newY;
 				}
 
 
