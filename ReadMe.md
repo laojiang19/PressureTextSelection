@@ -1,8 +1,9 @@
+### Multiple Independent Semantic Text Selection Using Pressure
+
 **Erik Paluka. Daniel Chang. Zachary Cook. 2012.**
 
 Submission for the UIST (ACM Symposium on User Interface Software and Technology) Student Innovation Contest (SIC) 2012.
 
-"Multiple Independent Semantic Text Selection Using Pressure"
 
 Includes a C++ bridge to Java. The bridge folder is called DIY.
 
